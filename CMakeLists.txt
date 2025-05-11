@@ -9,21 +9,3 @@ target_include_directories(EurobotCoreMath
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-
-install(
-        DIRECTORY include/
-        DESTINATION include
-)
-
-install(
-        TARGETS EurobotCoreMath
-        EXPORT EurobotCoreMath-targets
-        INCLUDES DESTINATION include
-)
-
-# ---- Export for Downstream Projects ----
-install(
-        EXPORT EurobotCoreMath-targets
-        FILE EurobotCoreMath-config.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EurobotCoreMath
-)
