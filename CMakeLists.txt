@@ -9,22 +9,21 @@ target_include_directories(EurobotCoreMath
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-include(GNUInstallDirs)
-install(
-        TARGETS EurobotCoreMath
-        EXPORT EurobotCoreMath-targets
-        INCLUDES DESTINATION include
-)
 
 install(
         DIRECTORY include/
         DESTINATION include
 )
 
+install(
+        TARGETS EurobotCoreMath
+        EXPORT EurobotCoreMath-targets
+        INCLUDES DESTINATION include
+)
+
 # ---- Export for Downstream Projects ----
 install(
         EXPORT EurobotCoreMath-targets
         FILE EurobotCoreMath-config.cmake
-        NAMESPACE CoreMath::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EurobotCoreMath
 )

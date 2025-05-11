@@ -10,7 +10,6 @@
 #define WARP_ANGLE_DEG(angle) fmod(fmod(angle + 180, 360) - 360, 360) + 180
 #define WARP_ANGLE(angle) fmod(fmod(angle + M_PI, 2*M_PI) - 2*M_PI, 2*M_PI) + M_PI
 #include <cmath>
-
 constexpr double unwrapAngleDeg(double previous_unwrapped, double new_angle_wrapped) {
     double delta = new_angle_wrapped - fmod(previous_unwrapped + 180.0, 360.0) + 180.0;
     return previous_unwrapped + WARP_ANGLE_DEG(delta);

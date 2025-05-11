@@ -114,5 +114,4 @@ constexpr std::optional<Position> intersectPerpendicularLine(const Position &p1,
 }
 
 
-
 #endif
