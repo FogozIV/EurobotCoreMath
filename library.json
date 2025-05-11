@@ -1,0 +1,10 @@
+{
+  "name": "EurobotCoreMath",
+  "version": "1.0.0",
+  "authors": "You",
+  "frameworks": "*",
+  "platforms": "*",
+  "build": {
+    "includeDir": "include"
+  }
+}
