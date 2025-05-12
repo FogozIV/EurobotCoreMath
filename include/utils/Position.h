@@ -6,6 +6,8 @@
 #include "Angle.h"
 #ifdef ARDUINO
 #include "Arduino.h"
+#else
+#include <iostream>
 #endif
 #ifdef ARDUINO
 class Position : public Printable {
@@ -45,8 +47,32 @@ private:
         return sqrt(pow(this->x, 2) + pow(this->y, 2));
     }
 
+    constexpr double normDeg() const {
+        return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->a.toDegrees(), 2));
+    }
+
+    constexpr double normRad() const {
+        return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->a.toRadians(), 2));
+    }
+
+    constexpr double norm() const {
+        return sqrt(pow(this->x, 2) + pow(this->y, 2));
+    }
+
     constexpr Angle getVectorAngle() const {
         return Angle::fromRadians(atan2(this->y, this->x));
+    }
+
+    constexpr std::array<double, 2> getXY() const {
+        return {this->x, this->y};
+    }
+
+    constexpr std::array<double, 3> getXYRad() const {
+        return {this->x, this->y, this->a.toRadians()};
+    }
+
+    constexpr std::array<double, 3> getXYDeg() const {
+        return {this->x, this->y, this->a.toDegrees()};
     }
 
 
@@ -112,6 +138,12 @@ constexpr std::optional<Position> intersectPerpendicularLine(const Position &p1,
     Position n2 = p2.getNormalVector();
     return intersectLines(p1, n1, p2, n2);
 }
+#ifndef ARDUINO
+inline std::ostream& operator<<(std::ostream& os, const Position& pos) {
+    os << "x: " << pos.getX() << ", y: " << pos.getY() << ", angle: " << pos.getAngle().toDegrees();
+    return os;
+}
+#endif
 
 
 #endif
