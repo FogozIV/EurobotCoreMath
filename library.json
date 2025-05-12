@@ -1,10 +1,21 @@
 {
   "name": "EurobotCoreMath",
   "version": "1.0.0",
-  "authors": "FogozIV",
+  "authors": [
+    {
+      "name": "FogozIV",
+      "email": "-",
+      "maintainer": true
+    }
+  ],
   "frameworks": "*",
   "platforms": "*",
   "build": {
     "includeDir": "include"
+  },
+  "description": "Eurobot Core Math library",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FogozIV/EurobotCoreMath.git"
   }
 }
