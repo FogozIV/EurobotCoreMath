@@ -100,7 +100,7 @@ private:
         return {this->x / rhs, this->y / rhs, this->a / rhs};
     }
 #ifdef ARDUINO
-    size_t Position::printTo(Print &p) const {
+    size_t printTo(Print &p) const {
         size_t length = 0;
         length += p.print("x: ");
         length += p.print(x);
