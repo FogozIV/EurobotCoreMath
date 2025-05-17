@@ -1,7 +1,7 @@
 //
 // Created by fogoz on 08/05/2025.
 //
-
+#define _USE_MATH_DEFINES
 #ifndef ANGLE_H
 #define ANGLE_H
 #ifdef ARDUINO
@@ -10,11 +10,14 @@
 #define WARP_ANGLE_DEG(angle) fmod(fmod(angle + 180, 360) - 360, 360) + 180
 #define WARP_ANGLE(angle) fmod(fmod(angle + M_PI, 2*M_PI) - 2*M_PI, 2*M_PI) + M_PI
 #include <cmath>
-constexpr double unwrapAngleDeg(double previous_unwrapped, double new_angle_wrapped) {
+#ifndef M_PI
+#include <corecrt_math_defines.h>
+#endif
+inline double unwrapAngleDeg(double previous_unwrapped, double new_angle_wrapped) {
     double delta = new_angle_wrapped - fmod(previous_unwrapped + 180.0, 360.0) + 180.0;
     return previous_unwrapped + WARP_ANGLE_DEG(delta);
 }
-constexpr double unwrapAngleRad(double previous_unwrapped, double new_angle_wrapped) {
+inline double unwrapAngleRad(double previous_unwrapped, double new_angle_wrapped) {
     double delta = new_angle_wrapped - fmod(previous_unwrapped + M_PI, M_PI * 2) + M_PI;
     return previous_unwrapped + WARP_ANGLE(delta);
 }
@@ -43,11 +46,11 @@ public:
         return unwrapAngleRad(previous_unwrapped, rad);
     }
 
-    constexpr Angle& toUnwrapped(Angle previous_unwrapped) {
+    Angle& toUnwrapped(Angle previous_unwrapped) {
         rad = unwrapAngleRad(previous_unwrapped.toRadians(), rad);
         return *this;
     }
-    constexpr Angle& fromUnwrapped(Angle wrapped) {
+    Angle& fromUnwrapped(Angle wrapped) {
         rad = unwrapAngleRad(rad, wrapped.toRadians());
         return *this;
     }
@@ -60,17 +63,17 @@ public:
         return rad;
     }
 
-    constexpr Angle& warpAngle() {
+    Angle& warpAngle() {
         rad = WARP_ANGLE(rad);
         return *this;
     }
 
     // Comparison operators generated with the help of ia (chat.deepseek.com)
-    constexpr bool operator==(const Angle& other) const {
+    bool operator==(const Angle& other) const {
         return std::abs(rad - other.rad) < 1e-10;  // small epsilon for floating point comparison
     }
 
-    constexpr bool operator!=(const Angle& other) const {
+    bool operator!=(const Angle& other) const {
         return !(*this == other);
     }
 

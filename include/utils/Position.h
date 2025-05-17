@@ -28,7 +28,7 @@ private:
     constexpr double getX() const{
         return x;
     };
-    
+
     constexpr double getY() const{
         return y;
     }
@@ -39,7 +39,7 @@ private:
     constexpr double getCurvature() const {
         return curvature;
     }
-    constexpr void add(double x, double y, Angle a){
+    void add(double x, double y, Angle a){
         this->x += x;
         this->y += y;
         this->a += a;
@@ -50,28 +50,28 @@ private:
         return {matrix(0,0), matrix(1,0)};
     }
 
-    constexpr Position& warpAngle() {
+    Position& warpAngle() {
         this->a.warpAngle();
         return *this;
     }
 
-    constexpr double getDistance() const {
+    double getDistance() const {
         return sqrt(pow(this->x, 2) + pow(this->y, 2));
     }
 
-    constexpr double normCompleteRad(double pos_weight, double angle_weight, double curvature_weight) const {
+    double normCompleteRad(double pos_weight, double angle_weight, double curvature_weight) const {
         return sqrt(pos_weight * pow(this->x, 2) + pos_weight * pow(this->y, 2) + angle_weight * pow(this->a.toRadians(), 2) + curvature_weight * pow(this->curvature, 2));
     }
 
-    constexpr double normDeg() const {
+    double normDeg() const {
         return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->a.toDegrees(), 2));
     }
 
-    constexpr double normRad() const {
+    double normRad() const {
         return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->a.toRadians(), 2));
     }
 
-    constexpr double norm() const {
+    double norm() const {
         return sqrt(pow(this->x, 2) + pow(this->y, 2));
     }
 
@@ -105,7 +105,7 @@ private:
         return {this->x - pos.x, this->y - pos.y, this->a - pos.a};
     }
 
-    constexpr Position operator+=(const Position &rhs) {
+    Position operator+=(const Position &rhs) {
         this->x += rhs.x;
         this->y += rhs.y;
         this->a += rhs.a;
@@ -141,7 +141,7 @@ private:
     }
 };
 
-constexpr std::optional<Position> intersectLines(const Position&p1, const Position&n1, const Position&p2, const Position&n2) {
+inline std::optional<Position> intersectLines(const Position&p1, const Position&n1, const Position&p2, const Position&n2) {
     double det = -n1.getX()*n2.getY() + n1.getY()*n2.getX();
     if (fabs(det) < 1e-6) {
         return std::nullopt;
@@ -158,7 +158,7 @@ constexpr Position operator*(double value, const Position& pos) {
     return pos * value;
 }
 
-constexpr std::optional<Position> intersectPerpendicularLine(const Position &p1, const Position &p2) {
+inline std::optional<Position> intersectPerpendicularLine(const Position &p1, const Position &p2) {
     Position n1 = p1.getNormalVector();
     Position n2 = p2.getNormalVector();
     return intersectLines(p1, n1, p2, n2);
