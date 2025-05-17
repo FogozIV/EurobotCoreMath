@@ -4,6 +4,7 @@
 #include <optional>
 
 #include "Angle.h"
+#include "Matrix.h"
 #ifdef ARDUINO
 #include "Arduino.h"
 #else
@@ -18,12 +19,19 @@ private:
     double x;
     double y;
     Angle a;
+#ifdef ENABLE_CURVATURE_POS
+    double curvature;
+#endif
+
 
     public:
-
+#ifdef ENABLE_CURVATURE_POS
+    constexpr Position(double x=0.0f, double y=0.0f, Angle a=AngleConstants::ZERO, double curvature=0.0f): x(x), y(y), a(a), curvature(curvature) {
+    }
+#else
     constexpr Position(double x=0.0f, double y=0.0f, Angle a=AngleConstants::ZERO): x(x), y(y), a(a) {
     }
-    
+#endif
     constexpr double getX() const{
         return x;
     };
@@ -35,7 +43,11 @@ private:
     constexpr Angle getAngle() const{
         return a;
     }
-
+#ifdef ENABLE_CURVATURE_POS
+    constexpr double getCurvature() const {
+        return curvature;
+    }
+#endif
     constexpr void add(double x, double y, Angle a){
         this->x += x;
         this->y += y;
@@ -43,9 +55,24 @@ private:
         this->a.warpAngle();
     }
 
+    static constexpr Position from(Matrix<2, 1> matrix) {
+        return {matrix(0,0), matrix(1,0)};
+    }
+
+    constexpr Position& warpAngle() {
+        this->a.warpAngle();
+        return *this;
+    }
+
     constexpr double getDistance() const {
         return sqrt(pow(this->x, 2) + pow(this->y, 2));
     }
+
+#ifdef ENABLE_CURVATURE_POS
+    constexpr double normCompleteRad(double pos_weight, double angle_weight, double curvature_weight) const {
+        return sqrt(pos_weight * pow(this->x, 2) + pos_weight * pow(this->y, 2) + angle_weight * pow(this->a.toRadians(), 2) + curvature_weight * pow(this->curvature, 2));
+    }
+#endif
 
     constexpr double normDeg() const {
         return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->a.toDegrees(), 2));
@@ -70,6 +97,13 @@ private:
     constexpr std::array<double, 3> getXYRad() const {
         return {this->x, this->y, this->a.toRadians()};
     }
+
+#ifdef ENABLE_CURVATURE_POS
+    constexpr std::array<double, 4> getXYRadCurv() const {
+        return {this->x, this->y, this->a.toRadians(), this->curvature};
+    }
+#endif
+
 
     constexpr std::array<double, 3> getXYDeg() const {
         return {this->x, this->y, this->a.toDegrees()};
@@ -133,17 +167,40 @@ constexpr std::optional<Position> intersectLines(const Position&p1, const Positi
     return center;
 }
 
+constexpr Position operator*(double value, const Position& pos) {
+    return pos * value;
+}
+
 constexpr std::optional<Position> intersectPerpendicularLine(const Position &p1, const Position &p2) {
     Position n1 = p1.getNormalVector();
     Position n2 = p2.getNormalVector();
     return intersectLines(p1, n1, p2, n2);
 }
 #ifndef ARDUINO
+template <class T, std::size_t N>
+std::ostream& operator<<(std::ostream& os, const std::array<T, N>& arr)
+{
+    os << "[";
+    for (std::size_t i = 0; i < N; ++i) {
+        os << arr[i];
+        if (i != N - 1)
+            os << ", ";
+    }
+    os << "]";
+    return os;
+}
+#ifdef ENABLE_CURVATURE_POS
+inline std::ostream& operator<<(std::ostream& os, const Position& pos) {
+    os << "x: " << pos.getX() << ", y: " << pos.getY() << ", angle: " << pos.getAngle().toDegrees() << ", curvature: " << pos.getCurvature();
+    return os;
+}
+#else
+
 inline std::ostream& operator<<(std::ostream& os, const Position& pos) {
     os << "x: " << pos.getX() << ", y: " << pos.getY() << ", angle: " << pos.getAngle().toDegrees();
     return os;
 }
 #endif
-
+#endif
 
 #endif
