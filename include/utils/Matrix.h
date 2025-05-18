@@ -42,7 +42,7 @@ public:
     static constexpr Matrix identity() {
         Matrix m;
         size_t smaller = std::min(rows, cols);
-        for (int i = 0; i < smaller; i++) {
+        for (size_t i = 0; i < smaller; i++) {
             m.data[i][i] = 1;
         }
         return m;
