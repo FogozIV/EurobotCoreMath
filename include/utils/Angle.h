@@ -38,11 +38,11 @@ public:
         return {rad};
     }
 
-    static constexpr Angle fromUnwrappedDegrees(double deg, double previous_unwrapped) {
+    static Angle fromUnwrappedDegrees(double deg, double previous_unwrapped) {
         return unwrapAngleDeg(previous_unwrapped, deg);
     }
 
-    static constexpr Angle fromUnwrappedRadians(double rad, double previous_unwrapped) {
+    static Angle fromUnwrappedRadians(double rad, double previous_unwrapped) {
         return unwrapAngleRad(previous_unwrapped, rad);
     }
 
