@@ -13,9 +13,15 @@
 #endif
 
 template<size_t rows, size_t cols>
+#ifndef ARDUINO
 class Matrix {
+#else
+class Matrix : public Printable{
+#endif
     std::array<std::array<double, cols>, rows> data;
 public:
+    const size_t _rows = rows;
+    const size_t _cols = cols;
 #ifndef ARDUINO
     friend constexpr std::ostream& operator<<(std::ostream& os, const Matrix<rows, cols>& matrix) {
         for (size_t i = 0; i < rows; ++i) {
@@ -110,6 +116,28 @@ public:
         return std::make_pair(L, U);
     }
 
+    constexpr Matrix<rows, cols>& operator*=(const Matrix<cols, rows>& rhs) {
+        for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < cols; ++j) {
+                double sum = 0;
+                for (size_t k = 0; k < cols; ++k) {
+                    sum += data[i][k] * rhs(k, j);
+                }
+                data[i][j] = sum;
+            }
+        }
+        return *this;
+    }
+
+    constexpr Matrix<rows, cols>& operator*=(double d) {
+        for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < cols; ++j) {
+                data[i][j] *= d;
+            }
+        }
+        return *this;
+    }
+
     // Inverse using LU Decomposition
     constexpr std::optional<Matrix<rows, cols>> inverse() const {
         if (rows != cols) {
@@ -125,27 +153,25 @@ public:
 
         // Use forward substitution to solve L * Y = I
         Matrix<rows, cols> Y;
-        for (size_t i = 0; i < rows; ++i) {
-            Y(i, i) = 1;
-            for (size_t j = 0; j < i; ++j) {
+        for (size_t j = 0; j < cols; ++j) {
+            for (size_t i = 0; i < rows; ++i) {
                 double sum = 0;
-                for (size_t k = 0; k < j; ++k) {
+                for (size_t k = 0; k < i; ++k) {
                     sum += L(i, k) * Y(k, j);
                 }
-                Y(i, j) = -sum;
+                Y(i, j) = (i == j ? 1.0 : 0.0) - sum;  // Handle identity matrix
             }
         }
 
         // Use backward substitution to solve U * X = Y
         Matrix<rows, cols> X;
-        for (size_t i = rows - 1; i < rows; --i) {
-            X(i, i) = Y(i, i) / U(i, i);
-            for (size_t j = i - 1; j < rows; --j) {
+        for (size_t j = 0; j < cols; ++j) {
+            for (size_t i = rows - 1; i < rows; --i) {  // Note: `size_t` underflow hack
                 double sum = 0;
                 for (size_t k = i + 1; k < rows; ++k) {
-                    sum += U(j, k) * X(k, i);
+                    sum += U(i, k) * X(k, j);
                 }
-                X(j, i) = (Y(j, i) - sum) / U(j, j);
+                X(i, j) = (Y(i, j) - sum) / U(i, i);
             }
         }
 
@@ -182,6 +208,38 @@ public:
         return sqrt(sum);
     }
 
+    constexpr double det() {
+        if (rows != cols) {
+            return 0; // Only square matrices have a determinant
+        }
+        double result = 1;
+        for (size_t i = 0; i < rows; ++i) {
+            result *= data[i][i];
+        }
+        return result;
+    }
+
+    constexpr void clear() {
+        for (auto& row : data) {
+            for (auto& col : row) {
+                col = 0;
+            }
+        }
+    }
+#ifdef ARDUINO
+    size_t printTo(Print &p) const override {
+        size_t n = 0;
+        for (size_t i = 0; i < rows; ++i) {
+            n += p.print(i == 0 ? "[" : " ");  // Opening bracket for first row
+            for (size_t j = 0; j < cols; ++j) {
+                n += p.print(data[i][j]);  // Fixed-width formatting
+                if (j < cols - 1) n+=p.print(", ");
+            }
+            n += p.print(i == rows - 1 ? "]" : "\n");  // Closing bracket for last row
+        }
+        return n;
+    }
+#endif
 };
 
 template<size_t R1, size_t C1, size_t C2>
