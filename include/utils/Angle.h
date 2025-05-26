@@ -7,20 +7,39 @@
 #ifdef ARDUINO
 #include "Arduino.h"
 #endif
-#define WARP_ANGLE_DEG(angle) fmod(fmod(angle + 180, 360) - 360, 360) + 180
-#define WARP_ANGLE(angle) fmod(fmod(angle + M_PI, 2*M_PI) - 2*M_PI, 2*M_PI) + M_PI
+#define WARP_ANGLE_DEG(angle) (fmod(fmod(angle + 180, 360) - 360, 360) + 180)
+
+#define WARP_ANGLE(angle) (fmod(fmod(angle + M_PI, 2*M_PI) - 2*M_PI, 2*M_PI) + M_PI)
 #include <cmath>
 #ifndef M_PI
 #include <corecrt_math_defines.h>
 #endif
+/*
 inline double unwrapAngleDeg(double previous_unwrapped, double new_angle_wrapped) {
     double delta = new_angle_wrapped - fmod(previous_unwrapped + 180.0, 360.0) + 180.0;
     return previous_unwrapped + WARP_ANGLE_DEG(delta);
+}*/
+
+inline double unwrapAngleDeg(double previous_unwrapped, double new_angle_wrapped) {
+    double delta = new_angle_wrapped - fmod(previous_unwrapped, 360.0);
+    // Wrap to [-180, 180)
+    delta = fmod(delta + 180.0, 360.0);
+    if (delta < 0) delta += 360.0;
+    delta -= 180.0;
+    return previous_unwrapped + delta;
 }
-inline double unwrapAngleRad(double previous_unwrapped, double new_angle_wrapped) {
+
+
+/*inline double unwrapAngleRad(double previous_unwrapped, double new_angle_wrapped) {
     double delta = new_angle_wrapped - fmod(previous_unwrapped + M_PI, M_PI * 2) + M_PI;
     return previous_unwrapped + WARP_ANGLE(delta);
+}*/
+inline double unwrapAngleRad(double previous_unwrapped, double new_angle_wrapped) {
+    double delta = WARP_ANGLE(new_angle_wrapped - previous_unwrapped);
+    return previous_unwrapped + delta;
 }
+
+
 class Angle {
 private:
     double rad;  // internal representation
