@@ -193,6 +193,31 @@ public:
     }
 
     /**
+     * @brief Create a Position offset
+     * @param dx the variation in the local x position
+     * @param dy the variation in the local y position
+     * @param da the angle (can be clearly ignored)
+     * @return the new position
+     */
+    constexpr Position offsetRelative(double dx, double dy, Angle da = AngleConstants::ZERO) const {
+        double theta = a.toRadians();
+        double cosA = cos(theta);
+        double sinA = sin(theta);
+
+        double newX = x + dx * cosA - dy * sinA;
+        double newY = y + dx * sinA + dy * cosA;
+        return Position(newX, newY, a + da);
+    }
+    /**
+     * @brief Create a Position offset
+     * @param pos the position
+     * @return the new position
+     */
+    constexpr Position offsetRelative(Position pos) const {
+        return offsetRelative(pos.getX(), pos.getY(), pos.getAngle());
+    }
+
+    /**
      * @brief Gets X,Y,angle(deg)
      * @return array<double,3> [x,y,angle]
      */
