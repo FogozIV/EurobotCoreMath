@@ -21,7 +21,11 @@ inline double unwrapAngleRad(double previous_unwrapped, double new_angle_wrapped
     double delta = new_angle_wrapped - fmod(previous_unwrapped + M_PI, M_PI * 2) + M_PI;
     return previous_unwrapped + WARP_ANGLE(delta);
 }
+#ifdef ARDUINO
+class Angle : public Printable  {
+#else
 class Angle {
+#endif
 private:
     double rad;  // internal representation
 
@@ -67,6 +71,15 @@ public:
         rad = WARP_ANGLE(rad);
         return *this;
     }
+
+#ifdef ARDUINO
+    size_t printTo(Print &p) const {
+        size_t length = 0;
+        length += p.print("Angle: ");
+        length += p.print(toDegrees());
+        return length;
+    }
+#endif
 
     // Comparison operators generated with the help of ia (chat.deepseek.com)
     bool operator==(const Angle& other) const {
@@ -168,5 +181,12 @@ namespace AngleConstants {
     inline constexpr Angle HALF_TURN = Angle::fromDegrees(180);
 }
 
+#ifndef ARDUINO
+#include <iostream>
+inline std::ostream& operator<<(std::ostream& os, const Angle& angle) {
+    os << angle.toDegrees();
+    return os;
+}
+#endif
 
 #endif //ANGLE_H
