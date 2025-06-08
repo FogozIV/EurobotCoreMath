@@ -43,7 +43,9 @@ public:
                 col = 0;
             }
         }
+
     }
+    constexpr Matrix(const Matrix& other) = default;
 
     static constexpr Matrix identity() {
         Matrix m;
@@ -217,6 +219,19 @@ public:
             result *= data[i][i];
         }
         return result;
+    }
+    constexpr Matrix& operator=(const Matrix& other) {
+        if (this != &other) {
+            data = other.data;
+        }
+        return *this;
+    }
+
+    constexpr Matrix& operator=(Matrix&& other) noexcept {
+        if (this != &other) {
+            data = std::move(other.data);
+        }
+        return *this;
     }
 
     constexpr void clear() {
