@@ -148,6 +148,10 @@ public:
         rad /= scalar;
         return *this;
     }
+
+    constexpr bool isBehind() const {
+        return abs(rad) > M_PI_2;
+    }
 };
 
 // User-defined literals

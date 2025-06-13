@@ -307,6 +307,10 @@ public:
     constexpr Position getNormalVector() const {
         return {-sin(this->a.toRadians()), cos(this->a.toRadians())};
     }
+
+    constexpr bool isBehind(Position pos) {
+        return ((pos - *this).getVectorAngle() - this->getAngle()).isBehind();
+    }
 };
 
 /**
