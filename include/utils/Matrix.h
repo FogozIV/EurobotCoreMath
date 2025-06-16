@@ -190,6 +190,15 @@ public:
         return result;
     }
 
+    constexpr Matrix& operator+=(const Matrix & rhs) {
+        for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < cols; ++j) {
+                data[i][j] += rhs.data[i][j];
+            }
+        }
+        return *this;
+    }
+
     constexpr Matrix operator-(const Matrix & matrix) const {
         Matrix result;
         for (size_t i = 0; i < rows; ++i) {
