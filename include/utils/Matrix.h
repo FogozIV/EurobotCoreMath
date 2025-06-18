@@ -209,6 +209,15 @@ public:
         return result;
     }
 
+    const Matrix& operator-=(const Matrix & rhs) {
+        for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < cols; ++j) {
+                data[i][j] -= rhs.data[i][j];
+            }
+        }
+        return *this;
+    }
+
     constexpr double norm() {
         double sum = 0;
         for (size_t i = 0; i < rows; ++i) {
