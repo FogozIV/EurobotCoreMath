@@ -7,9 +7,13 @@
 #ifdef ARDUINO
 #include "Arduino.h"
 #endif
-#define WARP_ANGLE_DEG(angle) (fmod(fmod(angle + 180, 360) - 360, 360) + 180)
+#define WARP_ANGLE_DEG(angle) (fmod(fmod((angle) + 180, 360) - 360, 360) + 180)
 
-#define WARP_ANGLE(angle) (fmod(fmod(angle + M_PI, 2*M_PI) - 2*M_PI, 2*M_PI) + M_PI)
+#define WARP_ANGLE(angle) ({ \
+    double _a = fmod((angle) + M_PI, 2.0 * M_PI); \
+    if (_a < 0) _a += 2.0 * M_PI; \
+    _a - M_PI; \
+    })
 #include <cmath>
 #ifndef M_PI
 #include <corecrt_math_defines.h>
