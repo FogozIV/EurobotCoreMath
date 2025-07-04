@@ -67,6 +67,14 @@ public:
         return data[row][col];
     }
 
+    constexpr double& operator()(size_t index) {
+        return (&data[0][0])[index];
+    }
+
+    constexpr double operator()(size_t index) const {
+        return (&data[0][0])[index];
+    }
+
     constexpr Matrix<cols, rows> transpose() const{
         Matrix<cols, rows>  m;
         for (size_t i = 0; i < rows; i++) {
@@ -138,6 +146,20 @@ public:
             }
         }
         return *this;
+    }
+
+    constexpr bool isFinite() const {
+        bool allFinite = true;
+        const double* begin = &data[0][0];
+        const double* end = begin + rows * cols;
+
+        for (const double* it = begin; it != end; ++it) {
+            if (!std::isfinite(*it)) {
+                allFinite = false;
+                break;
+            }
+        }
+        return allFinite;
     }
 
     // Inverse using LU Decomposition
@@ -259,6 +281,65 @@ public:
             }
         }
     }
+    constexpr std::optional<Matrix<rows, 1>> inverseB(const Matrix<cols, 1>& b) const {
+        if (rows!= cols) {
+            return std::nullopt;
+        }
+        // Copy matrix to avoid mutating the original
+        Matrix<rows, cols> A = *this;
+        Matrix<cols, 1> x;
+        size_t pivot[rows];
+
+        // Initialize pivot indices
+        for (size_t i = 0; i < rows; ++i)
+            pivot[i] = i;
+
+        // LU decomposition with partial pivoting
+        for (size_t i = 0; i < rows; ++i) {
+            double max = std::abs(A(i, i));
+            size_t maxRow = i;
+            for (size_t k = i + 1; k < rows; ++k) {
+                if (std::abs(A(k, i)) > max) {
+                    max = std::abs(A(k, i));
+                    maxRow = k;
+                }
+            }
+
+            if (std::abs(max) < 1e-12) return std::nullopt; // Singular
+
+            if (maxRow != i) {
+                std::swap(pivot[i], pivot[maxRow]);
+                for (size_t j = 0; j <rows; ++j)
+                    std::swap(A(i, j), A(maxRow, j));
+            }
+
+            for (size_t k = i + 1; k <rows; ++k) {
+                double factor = A(k, i) / A(i, i);
+                A(k, i) = factor;
+                for (size_t j = i + 1; j < rows; ++j)
+                    A(k, j) -= factor * A(i, j);
+            }
+        }
+
+        // Forward substitution: L * y = Pb
+        Matrix<rows, 1> y;
+        for (size_t i = 0; i < rows; ++i) {
+            y(i) = b(pivot[i]);
+            for (size_t j = 0; j < i; ++j)
+                y(i) -= A(i, j) * y(j);
+        }
+
+        // Backward substitution: U * x = y
+        for (int i = rows - 1; i >= 0; --i) {
+            x(i) = y(i);
+            for (size_t j = i + 1; j < rows; ++j)
+                x(i) -= A(i, j) * x(j);
+            x(i) /= A(i, i);
+        }
+
+        return x;
+    }
+
 #ifdef ARDUINO
     size_t printTo(Print &p) const override {
         size_t n = 0;
@@ -294,6 +375,14 @@ constexpr Matrix<R1, C2> operator*(const Matrix<R1, C1>& lhs, const Matrix<C1, C
 template<size_t R, size_t C>
 constexpr Matrix<R, C> operator*(double scalar, const Matrix<R, C>& mat) {
     return mat * scalar;
+}
+
+template<size_t R, size_t C, size_t C2>
+constexpr std::optional<Matrix<R,C2>> operator*(const std::optional<Matrix<R, C>>& lhs, const Matrix<C, C2>& rhs) {
+    if (!lhs.has_value()) {
+        return std::nullopt;
+    }
+    return lhs.value() * rhs;
 }
 
 #ifndef __cpp_constexpr_math
