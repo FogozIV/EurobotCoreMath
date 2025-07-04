@@ -208,6 +208,13 @@ public:
         double newY = y + dx * sinA + dy * cosA;
         return Position(newX, newY, a + da);
     }
+
+    constexpr Position offsetRelative(double d, Angle relativeAngle) const {
+        double dx = d * cos(relativeAngle.toRadians());
+        double dy = d * sin(relativeAngle.toRadians());
+        return offsetRelative(dx, dy);
+    }
+
     /**
      * @brief Create a Position offset
      * @param pos the position
